@@ -1,0 +1,143 @@
+:root {
+  --bg-color: #0f131a;
+  --panel-bg: #181f29;
+  --text-primary: #e8e8e8;
+  --accent: #4a90e2;
+  --dark-sq: #b58863;
+  --light-sq: #f0d9b5;
+  --selected-sq: rgba(255, 255, 51, 0.6);
+}
+
+* { 
+  box-sizing: border-box; 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+  
+  /* --- MOBILE OPTIMIZATIONS: Disable Text Selection & Native Touch Actions --- */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */
+  -webkit-touch-callout: none; /* Disable iOS long-press popup */
+  -webkit-tap-highlight-color: transparent; /* Remove blue tap flicker */
+  touch-action: manipulation; /* Prevent double-tap to zoom globally */
+}
+
+/* Allow text selection ONLY in guides/credits where users might actually want to copy */
+.install-guide p, .install-guide h3, .credits-text {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+body { 
+  margin: 0; 
+  /* Safe area padding protects content from notches/home-bars on modern phones */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  background: var(--bg-color); 
+  color: var(--text-primary); 
+  overscroll-behavior-y: none; /* Prevent pull-to-refresh on mobile */
+}
+
+.hero { 
+  display: flex; flex-direction: column; align-items: center; justify-content: center; 
+  min-height: 100vh; text-align: center; padding: 2rem 1rem; 
+}
+.hero h1 { font-size: clamp(2rem, 8vw, 3rem); margin-bottom: 0.5rem; }
+
+.btn { 
+  border: none; 
+  padding: 16px 20px; /* Increased touch target size for mobile */
+  border-radius: 8px; 
+  cursor: pointer; 
+  font-weight: bold; 
+  font-size: 1.1rem;
+  background: #333; color: #fff; 
+  transition: all 0.2s ease; 
+  text-decoration: none; 
+  display: inline-block; 
+}
+.btn:active { filter: brightness(0.8); transform: scale(0.97); } /* Native app tap feedback */
+.primary-btn { background: var(--accent); margin-bottom: 2rem; font-size: 1.2rem; }
+
+.install-guide { max-width: 600px; text-align: left; width: 100%; }
+.os-card { background: var(--panel-bg); padding: 15px; border-radius: 8px; margin-bottom: 10px; }
+.os-card h3 { margin: 0 0 5px 0; }
+.os-card p { margin: 0; font-size: 0.9rem; color: #bbb; line-height: 1.4; }
+
+.app-container { 
+  display: flex; flex-direction: row; 
+  height: 100vh; 
+  height: 100dvh; /* Uses true visible screen height on mobile */
+  overflow: hidden; 
+}
+
+.board-area { 
+  flex: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+  padding: 20px; min-width: 320px; 
+}
+
+.sidebar { 
+  flex: 1; background: var(--panel-bg); display: flex; flex-direction: column; 
+  min-width: 300px; border-left: 2px solid #2c3645; 
+  overflow-y: auto; /* Allows settings to scroll independently */
+  overscroll-behavior-y: contain; 
+}
+
+.status-bar { 
+  font-size: 1.5rem; font-weight: bold; margin-bottom: 15px; 
+  padding: 10px 20px; border-radius: 8px; background: rgba(0,0,0,0.3); 
+}
+
+.chessboard { 
+  display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr);
+  width: 100%; max-width: 550px; aspect-ratio: 1; 
+  border: 8px solid #2a2a2a; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
+  touch-action: none; /* Completely locks screen scrolling when touching the board */
+}
+.chessboard.flipped { transform: rotate(180deg); }
+.chessboard.flipped .square { transform: rotate(-180deg); }
+
+.square { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; cursor: pointer; position: relative; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+.square.light { background-color: var(--light-sq); }
+.square.dark { background-color: var(--dark-sq); }
+.square.selected::after { content:''; position:absolute; top:0;left:0;right:0;bottom:0; background: var(--selected-sq); box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+.square.valid-move::before { content:''; position:absolute; width: 30%; height: 30%; background: rgba(0,0,0,0.2); border-radius: 50%; }
+.square svg { width: 85%; height: 85%; z-index: 2; pointer-events: none; filter: drop-shadow(0px 3px 3px rgba(0,0,0,0.5)); }
+
+.tabs { display: flex; border-bottom: 2px solid #2c3645; flex-shrink: 0; }
+.tab-btn { flex: 1; padding: 18px 15px; background: none; border: none; color: #aaa; cursor: pointer; font-size: 1.05rem; font-weight: bold; }
+.tab-btn.active { color: #fff; border-bottom: 3px solid var(--accent); }
+.tab-content { padding: 20px; flex: 1; }
+
+.toggle-container { display: flex; align-items: center; cursor: pointer; font-size: 1.1rem; font-weight: 500; position: relative; padding: 10px 0; }
+.toggle-container input { opacity: 0; width: 0; height: 0; }
+.checkmark { width: 44px; height: 24px; background: #555; border-radius: 20px; margin-right: 12px; position: relative; transition: 0.3s; flex-shrink: 0; }
+.checkmark::after { content: ''; position: absolute; width: 20px; height: 20px; background: #fff; border-radius: 50%; top: 2px; left: 2px; transition: 0.3s; }
+.toggle-container input:checked ~ .checkmark { background: var(--accent); }
+.toggle-container input:checked ~ .checkmark::after { transform: translateX(20px); }
+.small-text { font-size: 0.85rem; color: #999; margin-top: 4px; line-height: 1.4; }
+
+.credits-text a { color: var(--accent); text-decoration: none; font-weight: bold; }
+.badge-wrapper { margin-top: 20px; }
+.badge-wrapper svg { max-width: 100%; height: auto; } /* Keeps badge constrained on tiny screens */
+hr { border: 1px solid #2c3645; margin: 20px 0; }
+
+/* --- MOBILE SPECIFIC LAYOUT CHANGES --- */
+@media (max-width: 768px) {
+  .app-container { flex-direction: column; }
+  
+  /* Locks the board nicely at the top of the phone screen */
+  .board-area { flex: none; height: auto; padding: 10px 5px; min-width: 100%; }
+  .chessboard { 
+    border-width: 4px; 
+    max-width: 100%; 
+    width: 95vw; /* Perfectly fits the screen edges */
+    height: 95vw; 
+  }
+  
+  .status-bar { font-size: 1.2rem; padding: 8px 16px; margin-bottom: 10px; }
+  
+  /* Pushes settings panel below the board and allows it to scroll natively */
+  .sidebar { flex: 1; border-left: none; border-top: 2px solid #2c3645; min-width: 100%; }
+  .tab-content { padding: 15px; }
+}
