@@ -24,7 +24,6 @@ let selectedSquare = null;
 let currentTurn = 'w';
 let isGameOver = false;
 
-// Custom Casual Mode Logic (For "Less Professional" setting)
 const initialCasual = [
   ['r','n','b','q','k','b','n','r'],
   ['p','p','p','p','p','p','p','p'],
@@ -36,7 +35,19 @@ const initialCasual = [
   ['R','N','B','Q','K','B','N','R']
 ];
 let casualBoard = JSON.parse(JSON.stringify(initialCasual));
-let casualHistory = []; // Needed for undo logic
+let casualHistory = [];
+
+// SPA Navigation
+function startGame() {
+  document.getElementById('main-menu').style.display = 'none';
+  document.getElementById('game-ui').style.display = 'flex';
+  resetGame();
+}
+
+function backToMenu() {
+  document.getElementById('game-ui').style.display = 'none';
+  document.getElementById('main-menu').style.display = 'flex';
+}
 
 function showTab(tabId) {
   document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
@@ -48,6 +59,16 @@ function showTab(tabId) {
 function toggleMode() {
   isCasualMode = document.getElementById('casual-toggle').checked;
   resetGame();
+}
+
+// Modal End Game triggers
+function showGameOverModal(msg) {
+  document.getElementById('game-over-text').innerText = msg;
+  document.getElementById('game-over-modal').style.display = 'flex';
+}
+
+function closeGameOverModal() {
+  document.getElementById('game-over-modal').style.display = 'none';
 }
 
 function resetGame() {
@@ -79,15 +100,10 @@ function undoMove() {
   updateBoardRotation();
 }
 
-function updateStatus(msg) {
+function updateStatus() {
   const sb = document.getElementById('status-bar');
-  if (msg) {
-    sb.innerText = msg;
-    sb.style.background = currentTurn === 'w' ? "rgba(255, 100, 100, 0.4)" : "rgba(100, 150, 255, 0.4)";
-  } else {
-    sb.innerText = currentTurn === 'w' ? "White's Turn" : "Black's Turn";
-    sb.style.background = "rgba(0,0,0,0.3)";
-  }
+  sb.innerText = currentTurn === 'w' ? "White's Turn" : "Black's Turn";
+  sb.style.background = "rgba(0,0,0,0.3)";
 }
 
 function updateBoardRotation() {
@@ -110,7 +126,7 @@ function getPieceAt(r, c) {
   return casualBoard[r][c];
 }
 
-// Casual Basic Rules Logic (Capture King to win, basic piece tracing)
+// Casual Basic Rules Logic (Capture King to win, kings cannot touch)
 function getCasualMoves(r, c) {
   let piece = casualBoard[r][c];
   if (!piece) return [];
@@ -142,14 +158,27 @@ function getCasualMoves(r, c) {
     }
   } else if (type === 'n') {
     [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]].forEach(d => add(r+d[0], c+d[1]));
-  } else if (type === 'k') {
-    [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].forEach(d => add(r+d[0], c+d[1]));
   } else if (type === 'r') {
     [[-1,0],[1,0],[0,-1],[0,1]].forEach(d => { let tr = r+d[0], tc = c+d[1]; while(add(tr, tc)) { tr+=d[0]; tc+=d[1]; } });
   } else if (type === 'b') {
     [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(d => { let tr = r+d[0], tc = c+d[1]; while(add(tr, tc)) { tr+=d[0]; tc+=d[1]; } });
   } else if (type === 'q') {
     [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].forEach(d => { let tr = r+d[0], tc = c+d[1]; while(add(tr, tc)) { tr+=d[0]; tc+=d[1]; } });
+  } else if (type === 'k') {
+    // Prevent King from touching the other King
+    let oppKingR = -1, oppKingC = -1;
+    for (let ir = 0; ir < 8; ir++) {
+      for (let ic = 0; ic < 8; ic++) {
+        if (casualBoard[ir][ic] === (color === 'w' ? 'k' : 'K')) {
+          oppKingR = ir; oppKingC = ic;
+        }
+      }
+    }
+    [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].forEach(d => {
+      let tr = r+d[0], tc = c+d[1];
+      if (Math.abs(tr - oppKingR) <= 1 && Math.abs(tc - oppKingC) <= 1) return; // Disallow touching
+      add(tr, tc);
+    });
   }
   return moves;
 }
@@ -164,14 +193,12 @@ function handleSquareClick(r, c) {
     let sr = selectedSquare.r;
     let sc = selectedSquare.c;
     
-    // Check if clicked the same team -> Change Selection
     if (pieceColor === currentTurn) {
       selectedSquare = {r, c};
       renderBoard();
       return;
     }
 
-    // Attempt Move
     let isValid = false;
     if (!isCasualMode) {
       let fromAlg = toAlg(sr, sc);
@@ -186,7 +213,6 @@ function handleSquareClick(r, c) {
       if (validMoves.find(m => m.r === r && m.c === c)) {
         casualHistory.push(JSON.stringify(casualBoard));
         let movingPiece = casualBoard[sr][sc];
-        // Auto Promote Pawn in Casual
         if (movingPiece.toLowerCase() === 'p' && (r === 0 || r === 7)) movingPiece = movingPiece === 'P' ? 'Q' : 'q';
         casualBoard[r][c] = movingPiece;
         casualBoard[sr][sc] = '';
@@ -200,7 +226,7 @@ function handleSquareClick(r, c) {
       checkGameOver();
       if (!isGameOver) updateStatus();
       renderBoard();
-      setTimeout(updateBoardRotation, 300); // Delayed rotation for visual feel
+      setTimeout(updateBoardRotation, 300);
     } else {
       selectedSquare = null;
       renderBoard();
@@ -215,13 +241,20 @@ function handleSquareClick(r, c) {
 
 function checkGameOver() {
   if (!isCasualMode) {
-    if (chess.in_checkmate()) { isGameOver = true; updateStatus("Checkmate! " + (currentTurn === 'w' ? "Black" : "White") + " Wins!"); }
-    else if (chess.in_stalemate() || chess.in_draw() || chess.in_threefold_repetition()) { isGameOver = true; updateStatus("Draw!"); }
+    if (chess.in_checkmate()) { 
+      isGameOver = true; 
+      let winner = currentTurn === 'b' ? "White" : "Black";
+      showGameOverModal("Checkmate! " + winner + " Wins!"); 
+    }
+    else if (chess.in_stalemate() || chess.in_draw() || chess.in_threefold_repetition()) { 
+      isGameOver = true; 
+      showGameOverModal("Draw!"); 
+    }
   } else {
     let wK = false, bK = false;
     casualBoard.forEach(row => row.forEach(p => { if (p === 'K') wK = true; if (p === 'k') bK = true; }));
-    if (!wK) { isGameOver = true; updateStatus("Black Wins! King Captured!"); }
-    else if (!bK) { isGameOver = true; updateStatus("White Wins! King Captured!"); }
+    if (!wK) { isGameOver = true; showGameOverModal("Black Wins!"); }
+    else if (!bK) { isGameOver = true; showGameOverModal("White Wins!"); }
   }
 }
 
@@ -258,5 +291,4 @@ function renderBoard() {
   }
 }
 
-// Init
-resetGame();
+renderBoard();
