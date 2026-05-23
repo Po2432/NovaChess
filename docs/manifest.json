@@ -1,0 +1,17 @@
+{
+  "name": "NovaChess PWA",
+  "short_name": "NovaChess",
+  "description": "Local offline multiplayer chess on a single device.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f131a",
+  "theme_color": "#181f29",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
