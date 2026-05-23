@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NovaChess | Offline PWA Chess</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <div class="hero">
+    <h1>NovaChess</h1>
+    <p>A beautifully simple, single-device offline multiplayer chess game.</p>
+    <a href="play.html" class="btn primary-btn">Play Pass-&-Play Now</a>
+    
+    <div class="install-guide">
+      <h2>Installation Guide (Play Anywhere Offline)</h2>
+      <div class="os-card">
+        <h3>🍎 iOS (Safari)</h3>
+        <p>Tap the <strong>Share</strong> button at the bottom, then select <strong>"Add to Home Screen"</strong>.</p>
+      </div>
+      <div class="os-card">
+        <h3>🤖 Android (Chrome)</h3>
+        <p>Tap the <strong>Menu (⋮)</strong> icon, then select <strong>"Install App"</strong> or <strong>"Add to Home Screen"</strong>.</p>
+      </div>
+      <div class="os-card">
+        <h3>💻 Desktop (Chrome/Edge)</h3>
+        <p>Click the <strong>Install icon (⊕)</strong> located on the right side of the browser URL bar.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>
