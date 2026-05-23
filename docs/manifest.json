@@ -2,7 +2,7 @@
   "name": "NovaChess PWA",
   "short_name": "NovaChess",
   "description": "Local offline multiplayer chess on a single device.",
-  "start_url": "./index.html",
+  "start_url": "./play.html",
   "display": "standalone",
   "background_color": "#0f131a",
   "theme_color": "#181f29",
