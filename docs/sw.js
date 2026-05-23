@@ -1,7 +1,6 @@
-const CACHE_NAME = 'novachess-offline-v1';
+const CACHE_NAME = 'novachess-offline-v2';
 const ASSETS = [
   './',
-  './index.html',
   './play.html',
   './style.css',
   './game.js',
